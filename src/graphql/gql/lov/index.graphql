@@ -1,0 +1,17 @@
+query lovPage($pagination: Pagination!, $input: LovPageInput) {
+  lovPage(pagination: $pagination, lovPageInput: $input) {
+    data {
+      id
+      code
+      name
+      desc
+    }
+    total
+  }
+}
+
+mutation createLov($input: CreateLov!) {
+  createLov(input: $input) {
+    id
+  }
+}

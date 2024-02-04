@@ -1,0 +1,11 @@
+query users($pagination: Pagination!, $input: UsersInput) {
+  users(pagination: $pagination, usersInput: $input) {
+    data {
+      id
+      nickname
+      phone
+      gender
+    }
+    total
+  }
+}
