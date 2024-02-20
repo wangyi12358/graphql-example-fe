@@ -89,6 +89,7 @@ export type Mutation = {
   createLov: Lov;
   createLovField: LovField;
   createUser: User;
+  deleteLov: Scalars['Boolean']['output'];
 };
 
 
@@ -106,6 +107,11 @@ export type MutationCreateUserArgs = {
   input: CreateUser;
 };
 
+
+export type MutationDeleteLovArgs = {
+  id: Scalars['Int']['input'];
+};
+
 export type Pagination = {
   /** 页码 */
   current: Scalars['Int']['input'];
@@ -114,9 +120,20 @@ export type Pagination = {
 };
 
 export type Query = {
+  findLov: Lov;
   lovFields: Array<LovField>;
   lovPage: LovPage;
   users: Users;
+};
+
+
+export type QueryFindLovArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type QueryLovFieldsArgs = {
+  lovId: Scalars['Int']['input'];
 };
 
 
@@ -164,6 +181,10 @@ export type UsersInput = {
   nickname?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type LovFragment = { id: number, code: string, name: string, desc?: string | null };
+
+export type LovFieldFragment = { id: number, label: string, value: string, status: number, desc?: string | null };
+
 export type LovPageQueryVariables = Exact<{
   pagination: Pagination;
   input?: InputMaybe<LovPageInput>;
@@ -172,12 +193,26 @@ export type LovPageQueryVariables = Exact<{
 
 export type LovPageQuery = { lovPage: { total: number, data: Array<{ id: number, code: string, name: string, desc?: string | null }> } };
 
+export type LovDetailQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type LovDetailQuery = { findLov: { id: number, code: string, name: string, desc?: string | null }, lovFields: Array<{ id: number, label: string, value: string, status: number, desc?: string | null }> };
+
 export type CreateLovMutationVariables = Exact<{
   input: CreateLov;
 }>;
 
 
 export type CreateLovMutation = { createLov: { id: number } };
+
+export type DeleteLovMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteLovMutation = { deleteLov: boolean };
 
 export type UsersQueryVariables = Exact<{
   pagination: Pagination;
@@ -187,25 +222,54 @@ export type UsersQueryVariables = Exact<{
 
 export type UsersQuery = { users: { total: number, data: Array<{ id: number, nickname?: string | null, phone?: string | null, gender: number }> } };
 
-
+export const LovFragmentDoc = gql`
+    fragment lov on Lov {
+  id
+  code
+  name
+  desc
+}
+    `;
+export const LovFieldFragmentDoc = gql`
+    fragment lovField on LovField {
+  id
+  label
+  value
+  status
+  desc
+}
+    `;
 export const LovPageDocument = gql`
     query lovPage($pagination: Pagination!, $input: LovPageInput) {
   lovPage(pagination: $pagination, lovPageInput: $input) {
     data {
-      id
-      code
-      name
-      desc
+      ...lov
     }
     total
   }
 }
-    `;
+    ${LovFragmentDoc}`;
+export const LovDetailDocument = gql`
+    query lovDetail($id: Int!) {
+  findLov(id: $id) {
+    ...lov
+  }
+  lovFields(lovId: $id) {
+    ...lovField
+  }
+}
+    ${LovFragmentDoc}
+${LovFieldFragmentDoc}`;
 export const CreateLovDocument = gql`
     mutation createLov($input: CreateLov!) {
   createLov(input: $input) {
     id
   }
+}
+    `;
+export const DeleteLovDocument = gql`
+    mutation deleteLov($id: Int!) {
+  deleteLov(id: $id)
 }
     `;
 export const UsersDocument = gql`
@@ -232,8 +296,14 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     lovPage(variables: LovPageQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<LovPageQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<LovPageQuery>(LovPageDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'lovPage', 'query', variables);
     },
+    lovDetail(variables: LovDetailQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<LovDetailQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<LovDetailQuery>(LovDetailDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'lovDetail', 'query', variables);
+    },
     createLov(variables: CreateLovMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CreateLovMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateLovMutation>(CreateLovDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createLov', 'mutation', variables);
+    },
+    deleteLov(variables: DeleteLovMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<DeleteLovMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<DeleteLovMutation>(DeleteLovDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'deleteLov', 'mutation', variables);
     },
     users(variables: UsersQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<UsersQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<UsersQuery>(UsersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'users', 'query', variables);

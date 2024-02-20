@@ -1,12 +1,19 @@
 query lovPage($pagination: Pagination!, $input: LovPageInput) {
   lovPage(pagination: $pagination, lovPageInput: $input) {
     data {
-      id
-      code
-      name
-      desc
+      ...lov
     }
     total
+  }
+}
+
+
+query lovDetail($id: Int!) {
+  findLov(id: $id) {
+    ...lov
+  }
+  lovFields(lovId: $id) {
+    ...lovField
   }
 }
 
@@ -14,4 +21,8 @@ mutation createLov($input: CreateLov!) {
   createLov(input: $input) {
     id
   }
+}
+
+mutation deleteLov($id: Int!) {
+  deleteLov(id: $id)
 }

@@ -1,0 +1,14 @@
+fragment lov on Lov {
+  id
+  code
+  name
+  desc
+}
+
+fragment lovField on LovField {
+  id
+  label
+  value
+  status
+  desc
+}
