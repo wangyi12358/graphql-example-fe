@@ -9,6 +9,8 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CreateModal } from './components/create-modal'
 
+const test_str = 1
+
 const Lov: React.FC = () => {
   const nav = useNavigate()
   return (
