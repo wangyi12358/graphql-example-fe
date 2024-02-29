@@ -1,4 +1,4 @@
-import { login } from '@/services/api'
+import sdk from '@/graphql/sdk'
 import { setCookie } from '@/utils/cookie'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { LoginForm, ProFormText } from '@ant-design/pro-components'
@@ -10,14 +10,16 @@ const Login: FC = () => {
       <div className='mt-[30vh] ml-[20vh]'>
         <LoginForm<API.LoginParams>
           initialValues={{
-            username: 'admin',
-            password: '666666'
+            username: 'wangyi12358',
+            password: '123456'
           }}
           onFinish={async values => {
-            const res = await login(values)
-            if (res?.token) {
-              setCookie(import.meta.env.VITE_TOKEN_KEY, res.token, 2)
-              location.href = import.meta.env.BASE_URL
+            const res = await sdk.login({
+              input: values
+            })
+            if (res?.login?.token) {
+              setCookie(import.meta.env.VITE_TOKEN_KEY, res.login.token, 2)
+              // location.href = import.meta.env.BASE_URL
             }
           }}
           title={<div className='mb-16 text-lg'>Base Admin</div>}

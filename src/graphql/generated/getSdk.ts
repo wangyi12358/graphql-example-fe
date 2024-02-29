@@ -36,7 +36,7 @@ export type CreateLovField = {
   /** 状态 */
   status: Scalars['Int']['input'];
   /** 值 */
-  value: Scalars['String']['input'];
+  value: Scalars['Int']['input'];
 };
 
 export type CreateUser = {
@@ -46,6 +46,16 @@ export type CreateUser = {
   password: Scalars['String']['input'];
   phone: Scalars['String']['input'];
   remark?: InputMaybe<Scalars['String']['input']>;
+  username: Scalars['String']['input'];
+};
+
+export type Login = {
+  token: Scalars['String']['output'];
+  user: User;
+};
+
+export type LoginInput = {
+  password: Scalars['String']['input'];
   username: Scalars['String']['input'];
 };
 
@@ -68,7 +78,7 @@ export type LovField = {
   /** 状态 */
   status: Scalars['Int']['output'];
   /** 值 */
-  value: Scalars['String']['output'];
+  value: Scalars['Int']['output'];
 };
 
 export type LovPage = {
@@ -90,6 +100,7 @@ export type Mutation = {
   createLovField: LovField;
   createUser: User;
   deleteLov: Scalars['Boolean']['output'];
+  login: Login;
 };
 
 
@@ -112,6 +123,11 @@ export type MutationDeleteLovArgs = {
   id: Scalars['Int']['input'];
 };
 
+
+export type MutationLoginArgs = {
+  input: LoginInput;
+};
+
 export type Pagination = {
   /** 页码 */
   current: Scalars['Int']['input'];
@@ -123,6 +139,7 @@ export type Query = {
   findLov: Lov;
   lovFields: Array<LovField>;
   lovPage: LovPage;
+  profile: User;
   users: Users;
 };
 
@@ -183,7 +200,7 @@ export type UsersInput = {
 
 export type LovFragment = { id: number, code: string, name: string, desc?: string | null };
 
-export type LovFieldFragment = { id: number, label: string, value: string, status: number, desc?: string | null };
+export type LovFieldFragment = { id: number, label: string, value: number, status: number, desc?: string | null };
 
 export type LovPageQueryVariables = Exact<{
   pagination: Pagination;
@@ -198,7 +215,7 @@ export type LovDetailQueryVariables = Exact<{
 }>;
 
 
-export type LovDetailQuery = { findLov: { id: number, code: string, name: string, desc?: string | null }, lovFields: Array<{ id: number, label: string, value: string, status: number, desc?: string | null }> };
+export type LovDetailQuery = { findLov: { id: number, code: string, name: string, desc?: string | null }, lovFields: Array<{ id: number, label: string, value: number, status: number, desc?: string | null }> };
 
 export type CreateLovMutationVariables = Exact<{
   input: CreateLov;
@@ -214,6 +231,8 @@ export type DeleteLovMutationVariables = Exact<{
 
 export type DeleteLovMutation = { deleteLov: boolean };
 
+export type UserFragment = { id: number, nickname?: string | null, phone?: string | null, gender: number };
+
 export type UsersQueryVariables = Exact<{
   pagination: Pagination;
   input?: InputMaybe<UsersInput>;
@@ -221,6 +240,18 @@ export type UsersQueryVariables = Exact<{
 
 
 export type UsersQuery = { users: { total: number, data: Array<{ id: number, nickname?: string | null, phone?: string | null, gender: number }> } };
+
+export type ProfileQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ProfileQuery = { profile: { id: number, nickname?: string | null, phone?: string | null, gender: number } };
+
+export type LoginMutationVariables = Exact<{
+  input: LoginInput;
+}>;
+
+
+export type LoginMutation = { login: { token: string, user: { id: number, nickname?: string | null, phone?: string | null, gender: number } } };
 
 export const LovFragmentDoc = gql`
     fragment lov on Lov {
@@ -237,6 +268,14 @@ export const LovFieldFragmentDoc = gql`
   value
   status
   desc
+}
+    `;
+export const UserFragmentDoc = gql`
+    fragment user on User {
+  id
+  nickname
+  phone
+  gender
 }
     `;
 export const LovPageDocument = gql`
@@ -276,15 +315,29 @@ export const UsersDocument = gql`
     query users($pagination: Pagination!, $input: UsersInput) {
   users(pagination: $pagination, usersInput: $input) {
     data {
-      id
-      nickname
-      phone
-      gender
+      ...user
     }
     total
   }
 }
-    `;
+    ${UserFragmentDoc}`;
+export const ProfileDocument = gql`
+    query profile {
+  profile {
+    ...user
+  }
+}
+    ${UserFragmentDoc}`;
+export const LoginDocument = gql`
+    mutation login($input: LoginInput!) {
+  login(input: $input) {
+    user {
+      ...user
+    }
+    token
+  }
+}
+    ${UserFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -307,6 +360,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     users(variables: UsersQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<UsersQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<UsersQuery>(UsersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'users', 'query', variables);
+    },
+    profile(variables?: ProfileQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ProfileQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ProfileQuery>(ProfileDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'profile', 'query', variables);
+    },
+    login(variables: LoginMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<LoginMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<LoginMutation>(LoginDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'login', 'mutation', variables);
     }
   };
 }

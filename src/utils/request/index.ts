@@ -1,5 +1,5 @@
-import axios, { AxiosResponse } from 'axios'
 import type { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import { getCookie } from '../cookie'
 
 function redirectLogin() {
@@ -8,6 +8,7 @@ function redirectLogin() {
 }
 
 export function getToken() {
+  console.log(123)
   return getCookie(import.meta.env.TOKEN_KEY)
 }
 

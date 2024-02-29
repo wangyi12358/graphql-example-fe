@@ -1,11 +1,23 @@
 query users($pagination: Pagination!, $input: UsersInput) {
   users(pagination: $pagination, usersInput: $input) {
     data {
-      id
-      nickname
-      phone
-      gender
+      ...user
     }
     total
+  }
+}
+
+query profile {
+  profile {
+    ...user
+  }
+}
+
+mutation login($input: LoginInput!) {
+  login(input: $input) {
+    user {
+      ...user
+    }
+    token
   }
 }

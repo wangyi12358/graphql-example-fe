@@ -1,0 +1,6 @@
+fragment user on User {
+  id
+  nickname
+  phone
+  gender
+}
